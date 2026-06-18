@@ -1,7 +1,6 @@
-#S06-26-AB Equipe 25
 App Bit (B2B) – Plataforma de Matching Inclusivo
 
-## Membros da equipe
+## Membros da equipe S06-26-AB 25
 
 - Ailson (Backend Developer)
 - Camila (Backend Developer)
