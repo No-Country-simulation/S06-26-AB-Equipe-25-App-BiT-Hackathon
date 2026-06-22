@@ -30,7 +30,7 @@ Todo o processo de estruturação, viabilidade e arquitetura do projeto está de
 ## Membros da equipe S06-26-AB 25
 
 - Ailson (backend developer)
-- Camila (backend developer)
+- Camila (backend & frontend developer)
 - Hendrius (backend developer)
 - Maria Vitória (ux writer)
 - Murilo (database administrator)
