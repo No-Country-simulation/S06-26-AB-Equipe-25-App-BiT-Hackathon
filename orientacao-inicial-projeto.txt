@@ -1,0 +1,571 @@
+# Plataforma de Matching Inclusivo — App BiT B2B
+
+## 1. Visão Geral
+
+A **Plataforma de Matching Inclusivo — App BiT B2B** é uma web app responsiva com agente de IA voltada para empresas que precisam contratar talentos de grupos sub-representados, cumprir metas ESG e demonstrar impacto real em diversidade, equidade e inclusão.
+
+A solução conecta empresas a profissionais qualificados, utiliza dados de geolocalização para identificar concentração de talentos por região e gera métricas de diversidade para apoiar decisões estratégicas.
+
+A proposta não é apenas criar uma plataforma de recrutamento, nem apenas um painel de métricas.
+O objetivo é construir uma ferramenta que coloque a diversidade no centro da estratégia de negócio, combinando:
+
+* Dados reais
+* Matching inteligente
+* Redução de viés
+* Relatórios ESG
+* Impacto mensurável
+
+---
+
+## 2. Problema
+
+Empresas com metas ESG enfrentam dificuldade para encontrar, avaliar e contratar talentos de grupos sub-representados de forma eficiente, estruturada e com menor viés.
+
+### Principais dores
+
+* Dificuldade em encontrar candidatos qualificados de grupos sub-representados
+* Processos seletivos afetados por viés inconsciente
+* Falta de dados confiáveis para embasar decisões de diversidade
+* Pressão crescente de investidores, stakeholders e reguladores por metas ESG mensuráveis
+* Baixa visibilidade sobre onde estão geograficamente os talentos disponíveis
+* Dificuldade em transformar diversidade em uma métrica estratégica de negócio
+
+---
+
+## 3. Público-Alvo
+
+A plataforma é direcionada para empresas e organizações que precisam contratar com foco em diversidade e acompanhar indicadores ESG.
+
+### Perfis de usuários
+
+* Recrutadores
+* Gestores de RH
+* Líderes de diversidade, equidade e inclusão
+* Gestores de ESG
+* Lideranças corporativas responsáveis por metas de contratação inclusiva
+
+---
+
+## 4. Proposta de Valor
+
+A plataforma ajuda empresas a identificar, atrair e contratar talentos de grupos sub-representados com maior inteligência, rastreabilidade e impacto.
+
+### Benefícios esperados
+
+* Melhorar a eficiência na busca por talentos diversos
+* Reduzir vieses no processo seletivo
+* Apoiar decisões de contratação com dados geográficos e comportamentais
+* Gerar métricas de diversidade úteis para relatórios ESG
+* Facilitar a conexão entre empresas e profissionais qualificados
+* Transformar diversidade em vantagem estratégica e não apenas obrigação institucional
+
+---
+
+## 5. Serviços do MVP
+
+O MVP da plataforma é estruturado em cinco serviços principais.
+
+---
+
+### 5.1 Formações
+
+Trilhas de capacitação em diversidade, inclusão e cultura organizacional para equipes de RH e lideranças corporativas.
+
+O objetivo é ajudar empresas a desenvolver uma cultura inclusiva de dentro para fora, preparando gestores e recrutadores para conduzir processos mais justos.
+
+### Funcionalidades possíveis
+
+* Trilhas de conteúdo sobre diversidade e inclusão
+* Materiais educativos para recrutadores
+* Conteúdos para liderança inclusiva
+* Acompanhamento básico de progresso
+
+---
+
+### 5.2 Empregabilidade
+
+Módulo central da plataforma. Permite que empresas publiquem vagas e recebam uma shortlist de candidatos compatíveis a partir do módulo B2C.
+
+A seleção utiliza score de compatibilidade entre vaga e perfil profissional, além de badge de diversidade e filtros para reduzir viés inconsciente.
+
+### Funcionalidades principais
+
+* Publicação de vagas
+* Matching inteligente com candidatos
+* Score de compatibilidade
+* Badge de diversidade
+* Filtro anti-viés
+* Shortlist de candidatos
+* Modelo de monetização baseado em percentual sobre contratação realizada via plataforma
+
+---
+
+### 5.3 Experiências Estruturantes
+
+Eventos corporativos focados em diversidade, pertencimento e transformação cultural.
+
+Esses eventos podem incluir painéis, palestras e encontros com líderes de grupos sub-representados, com o objetivo de inspirar a cultura interna da empresa.
+
+### Exemplos
+
+* Palestras corporativas
+* Painéis de diversidade
+* Rodas de conversa
+* Eventos com lideranças de grupos sub-representados
+* Experiências voltadas à sensibilização de equipes
+
+---
+
+### 5.4 Mentorias
+
+Módulo de conexão entre empresas, lideranças e especialistas em diversidade.
+
+O objetivo é permitir troca de boas práticas entre organizações, promovendo networking corporativo orientado por impacto.
+
+### Funcionalidades possíveis
+
+* Conexão com líderes de diversidade
+* Sessões de mentoria corporativa
+* Compartilhamento de boas práticas
+* Networking entre empresas
+* Registro de aprendizados e recomendações
+
+---
+
+### 5.5 Saúde do Time
+
+Dashboard de bem-estar dos colaboradores por perfil e região, utilizando dados anonimizados do módulo B2C.
+
+O objetivo é ajudar a empresa a identificar riscos de burnout, exclusão ou baixa inclusão antes que esses problemas se tornem críticos.
+
+### Funcionalidades possíveis
+
+* Indicadores de bem-estar
+* Análise por perfil e região
+* Dados anonimizados
+* Alertas sobre possíveis riscos
+* Visão agregada para tomada de decisão
+
+---
+
+## 6. Fluxo do Usuário — Recrutador
+
+1. A empresa realiza o cadastro na plataforma
+2. Configura seu perfil institucional, metas ESG e critérios de diversidade
+3. Publica uma vaga com requisitos técnicos, nível e região desejada
+4. O agente de IA processa os critérios da vaga
+5. A plataforma retorna uma shortlist de candidatos compatíveis
+6. Cada candidato recebe um score de compatibilidade e badge de diversidade
+7. O recrutador visualiza um mapa de concentração de talentos por região
+8. O recrutador seleciona candidatos e inicia o processo de contato
+9. O dashboard atualiza métricas de diversidade em tempo real
+10. A empresa acompanha o impacto da contratação em seus indicadores ESG
+
+---
+
+## 7. Dataset — Vísent CDRView
+
+O projeto utiliza o dataset **Vísent CDRView**, que contém dados de concentração de pessoas por zona e cobertura de rede ERB, considerando tecnologias 5G, 4G e 3G.
+
+Os dados são emulados, mas utilizam coordenadas reais de antenas da Anatel.
+
+### Fonte
+
+Repositório: `github.com/wongola-bit/appbit`
+
+O repositório inclui:
+
+* README
+* Dicionário de colunas
+* Dados de concentração por zona
+* Dados de cobertura de rede
+* Coordenadas reais de antenas
+
+---
+
+## 8. Uso do Dataset no Projeto
+
+No contexto deste desafio, o dataset será usado para criar um mapa de concentração de talentos por região.
+
+A plataforma deve permitir que empresas entendam:
+
+* Onde estão concentrados os talentos disponíveis
+* Quais regiões possuem maior presença de profissionais qualificados
+* Como a conectividade da região pode impactar oportunidades remotas ou híbridas
+* Quais áreas têm melhor cobertura de rede
+* Como dados geográficos podem apoiar decisões de recrutamento inclusivo
+
+### Exemplo de aplicação
+
+Antes de publicar uma vaga, a empresa pode visualizar regiões com maior concentração de candidatos qualificados de grupos sub-representados e avaliar a qualidade de conectividade dessas zonas.
+
+---
+
+## 9. Funcionalidades Exigidas — MVP
+
+O MVP deve conter, obrigatoriamente:
+
+* Publicação de vaga com skills, nível e região
+* Endpoint `/match` retornando shortlist de candidatos
+* Score de compatibilidade entre candidato e vaga
+* Badge de diversidade
+* Interface responsiva com tela de shortlist
+* Métricas básicas de diversidade
+* README com instruções de execução local
+* Exemplos de request e response da API
+
+---
+
+## 10. Funcionalidades Opcionais
+
+Funcionalidades que podem ser implementadas caso haja tempo disponível:
+
+* Mapa interativo usando dados do Vísent CDRView
+* Visualização de concentração de talentos por zona
+* Filtro anti-viés com explicabilidade
+* Explicação sobre por que um candidato foi ou não selecionado
+* Relatório de diversidade exportável em PDF
+* Dashboard de saúde do time por perfil e região
+* Notificações para recrutadores sobre novos candidatos compatíveis
+* Integração com módulo B2C para matching em tempo real
+* Seção de eventos corporativos de diversidade
+* Seção de mentorias corporativas
+* Histórico de contratações e impacto ESG
+
+---
+
+## 11. Endpoints Principais
+
+### 11.1 Criar Matching de Candidatos
+
+```http
+POST /match
+```
+
+### Request
+
+```json
+{
+  "empresa_id": "empresa_001",
+  "vaga": {
+    "titulo": "Desenvolvedor Backend Júnior",
+    "skills": ["Node.js", "PostgreSQL", "APIs REST"],
+    "nivel": "junior",
+    "regiao": "Salvador - BA"
+  },
+  "filtros": {
+    "anti_vies": true,
+    "diversidade_minima": 40
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "candidatos": [
+    {
+      "candidato_id": "cand_001",
+      "nome": "Ana Souza",
+      "score_match": 87,
+      "badge_diversidade": "Mulher negra em tecnologia",
+      "skills": ["Node.js", "PostgreSQL", "Docker"],
+      "lat": -12.9714,
+      "lng": -38.5014
+    }
+  ],
+  "total_analisados": 120,
+  "diversidade_resultado": {
+    "percentual_diversidade": 62,
+    "criterio_minimo_atendido": true
+  }
+}
+```
+
+---
+
+### 11.2 Obter Insights Geográficos
+
+```http
+GET /insights
+```
+
+### Response
+
+```json
+{
+  "mapa_talentos": [
+    {
+      "regiao": "Salvador - BA",
+      "concentracao": 78,
+      "cobertura_rede": "4G/5G",
+      "perfis_disponiveis": [
+        "Desenvolvedor Backend",
+        "Analista de Dados",
+        "UX Designer"
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 12. Regras de Matching
+
+O score de compatibilidade pode considerar critérios simples no MVP.
+
+### Critérios sugeridos
+
+* Compatibilidade entre skills da vaga e skills do candidato
+* Nível profissional
+* Localização ou região de interesse
+* Disponibilidade
+* Critérios declarativos de diversidade
+* Aderência mínima aos requisitos obrigatórios
+
+### Exemplo de cálculo simplificado
+
+```text
+score_match = 
+  peso_skills + 
+  peso_nivel + 
+  peso_regiao + 
+  peso_disponibilidade + 
+  peso_diversidade
+```
+
+### Observação
+
+Para o MVP, o badge de diversidade pode ser declarativo e baseado em dados mockados. Não é necessário implementar modelo preditivo ou classificação sensível avançada.
+
+---
+
+## 13. Filtro Anti-Viés
+
+O filtro anti-viés pode ser implementado inicialmente como uma camada simples de proteção contra critérios discriminatórios.
+
+### Possíveis abordagens
+
+* Ocultar informações sensíveis na primeira etapa da shortlist
+* Priorizar critérios técnicos e objetivos
+* Evitar ranqueamento baseado em nome, idade, gênero ou aparência
+* Explicar quais critérios foram usados no score
+* Permitir auditoria básica da recomendação
+
+### Status no MVP
+
+O filtro anti-viés é desejável, mas pode ser tratado como funcionalidade opcional caso o tempo seja limitado.
+
+---
+
+## 14. Métricas Básicas de Diversidade
+
+A plataforma deve apresentar métricas simples que ajudem a empresa a acompanhar impacto.
+
+### Métricas sugeridas
+
+* Total de candidatos analisados
+* Percentual de candidatos de grupos sub-representados na shortlist
+* Distribuição por região
+* Distribuição por skills
+* Percentual de aderência à meta mínima de diversidade
+* Evolução de diversidade nas vagas publicadas
+* Número de contratações realizadas via plataforma
+
+---
+
+## 15. Interface do MVP
+
+A interface deve ser responsiva e funcionar bem em desktop e dispositivos móveis.
+
+### Telas sugeridas
+
+1. **Cadastro ou login da empresa**
+2. **Configuração de metas ESG**
+3. **Publicação de vaga**
+4. **Shortlist de candidatos**
+5. **Mapa de concentração de talentos**
+6. **Dashboard de métricas de diversidade**
+7. **Detalhe do candidato**
+8. **Relatórios ou insights**
+
+---
+
+## 16. Orientações Técnicas
+
+A solução deve ser uma web app responsiva, preferencialmente com possibilidade de uso como PWA.
+
+### Stack
+
+O stack é livre. A equipe pode utilizar as tecnologias que domina melhor.
+
+### Exemplos de tecnologias possíveis
+
+* Frontend: React, Vue, Angular ou Next.js
+* Backend: Node.js, Python, Java, Spring Boot ou outra tecnologia
+* Banco de dados: PostgreSQL, MySQL, SQLite ou MongoDB
+* Deploy: Railway, Render, Vercel, Netlify ou similar
+
+### Recomendações
+
+* Começar pelo contrato de integração entre frontend e backend
+* Criar dados mockados para candidatos e empresas
+* Implementar primeiro o endpoint `/match`
+* Usar variáveis de ambiente para configurações sensíveis
+* Nunca subir credenciais ou chaves de API no repositório
+* Documentar instruções de execução local no README
+* Incluir exemplos de request e response
+* Priorizar entrega funcional antes de sofisticação visual
+
+---
+
+## 17. Entregáveis Esperados
+
+Ao final do MVP, o projeto deve conter:
+
+* Repositório GitHub organizado
+* README com instruções de instalação e execução
+* Web app responsiva
+* Endpoint `/match` funcional
+* Endpoint `/insights` funcional ou mockado
+* Dados mockados de candidatos
+* Tela de publicação de vaga
+* Tela de shortlist de candidatos
+* Métricas básicas de diversidade
+* Demonstração do fluxo principal
+* Exemplos de payloads da API
+
+---
+
+## 18. Plano de Execução — Dia 1
+
+### 18.1 Alinhamento Inicial
+
+Realizar reunião de equipe para:
+
+* Apresentação dos membros
+* Definição de papéis
+* Divisão de responsabilidades
+* Escolha do stack
+* Alinhamento do escopo do MVP
+* Definição do contrato de integração
+
+---
+
+### 18.2 Configuração do Ambiente
+
+Atividades iniciais:
+
+* Criar repositório no GitHub
+* Configurar estrutura base do projeto
+* Criar arquivo `.env.example`
+* Definir banco de dados ou estrutura mockada
+* Criar seed de candidatos
+* Configurar frontend e backend
+* Criar primeira versão do README
+
+---
+
+### 18.3 Divisão das Frentes
+
+Sugestão de divisão:
+
+#### Frontend
+
+* Tela de publicação de vaga
+* Tela de shortlist
+* Tela de métricas básicas
+* Responsividade
+
+#### Backend
+
+* Endpoint `/match`
+* Endpoint `/insights`
+* Dados mockados
+* Lógica básica de scoring
+* Documentação dos contratos
+
+#### Dados e IA
+
+* Estrutura de candidatos
+* Regras de matching
+* Score de compatibilidade
+* Badge de diversidade
+* Uso do dataset Vísent CDRView
+
+---
+
+## 19. Priorização do MVP
+
+### Prioridade Alta
+
+* Publicação de vaga
+* Endpoint `/match`
+* Shortlist de candidatos
+* Score de compatibilidade
+* Badge de diversidade
+* README
+* Interface responsiva básica
+
+### Prioridade Média
+
+* Endpoint `/insights`
+* Métricas básicas de diversidade
+* Mapa simples ou tabela por região
+* Dados mockados mais realistas
+
+### Prioridade Baixa
+
+* Exportação em PDF
+* Notificações
+* Dashboard avançado
+* Integração em tempo real com módulo B2C
+* Explicabilidade avançada do filtro anti-viés
+* Eventos e mentorias completas
+
+---
+
+## 20. Referências Culturais
+
+As referências abaixo ajudam a ampliar a compreensão sobre o tipo de impacto buscado pelo projeto.
+
+A proposta deve ir além do assistencialismo. O foco é promover:
+
+* Autonomia
+* Pertencimento
+* Protagonismo
+* Oportunidade real
+* Transformação social mensurável
+* Inclusão como estratégia de negócio
+
+### Filmes
+
+* **The Boy Who Harnessed the Wind** — jovem africano que enfrenta a seca usando engenharia, criatividade e determinação.
+* **Gênio Indomável** — potencial intelectual reprimido por falta de oportunidade e pertencimento.
+* **Infinito** — superação pessoal, propósito e reconstrução de trajetória.
+* **À Procura da Felicidade** — resiliência, empreendedorismo e ascensão a partir da adversidade.
+* **Mãos Talentosas** — talento que supera barreiras socioeconômicas.
+* **Rainha de Katwe** — protagonismo feminino negro, estratégia e desenvolvimento intelectual.
+
+### Livros
+
+* **Apaixone-se pelo Problema, Não Pela Solução** — Uri Levine
+* **De Onde Vêm as Boas Ideias** — Steven Johnson
+
+---
+
+## 21. Princípio Norteador
+
+O projeto deve ser guiado pelo problema, não pela tecnologia.
+
+A pergunta central não é apenas:
+
+> Como criar uma plataforma de recrutamento?
+
+A pergunta correta é:
+
+> Como ajudar empresas a encontrar, contratar e desenvolver talentos sub-representados de forma justa, mensurável e estrategicamente relevante?
+
+A tecnologia deve servir a esse objetivo.
