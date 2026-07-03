@@ -6,3 +6,5 @@ pydantic
 duckduckgo-search
 beautifulsoup4
 deepagents
+fastapi
+uvicorn
