@@ -17,6 +17,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local databases
+*.sqlite
+*.sqlite3
+
 # OS / Editor
 .DS_Store
 Thumbs.db
