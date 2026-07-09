@@ -16,6 +16,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/insights", insightsRoutes);
