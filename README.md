@@ -27,6 +27,87 @@ Todo o processo de estruturação, viabilidade e arquitetura do projeto está de
 
 ---
 
+## Execução Local do Backend
+
+O backend atual usa **Node.js + Express + TypeScript + TypeORM + SQLite**.
+
+### Instalação
+
+```bash
+cd backend
+npm install
+```
+
+### Popular banco local
+
+```bash
+npm run seed
+```
+
+O comando cria/atualiza o SQLite local e insere candidatos sintéticos para a demo. O arquivo `database.sqlite` é local e não deve ser commitado.
+
+### Rodar em desenvolvimento
+
+```bash
+npm run dev
+```
+
+Servidor padrão: `http://localhost:3001`
+
+### Credencial de login mockada
+
+```json
+{
+  "email": "recrutador@appbit.local",
+  "password": "appbit123"
+}
+```
+
+### Health check
+
+```bash
+curl http://localhost:3001/api/v1/health
+```
+
+### Login
+
+```bash
+curl -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"recrutador@appbit.local","password":"appbit123"}'
+```
+
+### Matching
+
+```bash
+curl -X POST http://localhost:3001/api/v1/match \
+  -H "Content-Type: application/json" \
+  -d '{
+    "empresa_id": "empresa-demo",
+    "vaga": {
+      "titulo": "Desenvolvedor Backend Junior",
+      "skills": ["Node.js", "TypeScript", "PostgreSQL", "APIs REST"],
+      "nivel": "junior",
+      "regiao": "Florianopolis - SC",
+      "modalidade": "remoto"
+    },
+    "filtros": {
+      "anti_vies": true,
+      "diversidade_minima": 40
+    }
+  }'
+```
+
+### Insights regionais
+
+```bash
+curl http://localhost:3001/api/v1/insights
+```
+
+As rotas versionadas oficiais usam o prefixo `/api/v1`. As rotas antigas sem prefixo continuam disponíveis como aliases de desenvolvimento.
+
+---
+
 ## Membros da equipe S06-26-AB 25
 
 - Ailson (backend developer)
