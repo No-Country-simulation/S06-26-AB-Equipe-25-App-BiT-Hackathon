@@ -27,6 +27,7 @@ const steps = [
 ];
 
 const audiences = ["PcD", "Mulher", "Pessoa negra", "Pessoa LGBTQIA+", "Profissional 50+"];
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3003/api/v1";
 
 const company = {
   nome: "Ambev S.A.",
@@ -36,104 +37,267 @@ const company = {
   metaDiversidade: 0.45,
 };
 
-const jobs = [
-  {
-    id: 47,
-    titulo: "Analista de Dados Sênior",
-    data: "18 jun. 2026",
-    status: "Ativa",
-    nivel: "senior",
-    skills: ["Python", "SQL", "Spark"],
-    regiao: "CBD_BEIRAMAR",
-  },
-  {
-    id: 32,
-    titulo: "Desenvolvedora Full-Stack Pleno",
-    data: "02 jun. 2026",
-    status: "Ativa",
-    nivel: "pleno",
-    skills: ["React", "Node.js", "PostgreSQL"],
-    regiao: "TRINDADE",
-  },
-  {
-    id: 18,
-    titulo: "Coordenadora de Diversidade e Inclusão",
-    data: "14 mai. 2026",
-    status: "Encerrada",
-    nivel: "senior",
-    skills: ["ESG", "People Analytics", "Liderança"],
-    regiao: "SAO_JOSE_CENTRO",
-  },
-];
+const defaultCompany = {
+  nome: "Ambev S.A.",
+  iniciais: "AM",
+  id: null,
+  metaDiversidade: 0.45,
+};
 
-const candidates = [
-  {
-    id: "#0001",
-    initials: "MS",
-    name: "Mariana Souza",
-    score: 91,
-    badge: true,
-    tags: ["Pessoa com Deficiência (PcD)", "Mulher"],
-    role: "Analista de Dados Sr.",
-    education: "Ciência da Computação",
-    skills: ["Python", "SQL", "Spark"],
-  },
-  {
-    id: "#0002",
-    initials: "LC",
-    name: "Lucas Carvalho",
-    score: 87,
-    badge: true,
-    tags: ["Pessoa negra"],
-    role: "Engenheiro de Dados Pleno",
-    education: "Sistemas de Informação",
-    skills: ["Python", "Airflow", "BigQuery"],
-  },
-  {
-    id: "#0003",
-    initials: "AR",
-    name: "Ana Ribeiro",
-    score: 82,
-    badge: true,
-    tags: ["Mulher", "Profissional 50+"],
-    role: "Especialista BI",
-    education: "Estatística",
-    skills: ["Power BI", "SQL", "Databricks"],
-  },
-  {
-    id: "#0004",
-    initials: "JP",
-    name: "João Pereira",
-    score: 76,
-    badge: false,
-    tags: ["Região prioritária"],
-    role: "Analista de Dados Pleno",
-    education: "Engenharia de Produção",
-    skills: ["Python", "Excel", "Tableau"],
-  },
-];
+function parseSkills(value) {
+  if (Array.isArray(value)) return value;
+  return String(value ?? "")
+    .split(",")
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
+
+function formatDate(value) {
+  if (!value) return "agora";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+}
+
+function initialsFromName(name) {
+  return String(name ?? "??")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "??";
+}
+
+function normalizeLevel(level) {
+  const value = String(level ?? "pleno").toLowerCase();
+  const map = {
+    estágio: "estagio",
+    estagio: "estagio",
+    júnior: "junior",
+    junior: "junior",
+    pleno: "pleno",
+    sênior: "senior",
+    senior: "senior",
+  };
+  return map[value] ?? value;
+}
+
+function normalizeWorkMode(mode) {
+  const value = String(mode ?? "hibrido").toLowerCase();
+  const map = {
+    híbrido: "hibrido",
+    hibrido: "hibrido",
+    remoto: "remoto",
+    presencial: "presencial",
+  };
+  return map[value] ?? value;
+}
+
+function normalizeJob(job) {
+  const rawStatus = String(job.status ?? "Ativa").toLowerCase();
+  const status = rawStatus === "aberta" || rawStatus === "open" || rawStatus === "ativa" ? "Ativa" : "Encerrada";
+
+  return {
+    id: job.id ?? job.vaga_id ?? job._id,
+    titulo: job.titulo ?? job.title ?? "Vaga sem título",
+    data: formatDate(job.created_at ?? job.createdAt ?? job.data_publicacao ?? job.data),
+    status,
+    nivel: normalizeLevel(job.nivel ?? job.level),
+    skills: parseSkills(job.skills ?? job.skills_requeridas ?? job.requisitos),
+    regiao: job.regiao ?? job.region ?? company.regiao,
+    modalidade: normalizeWorkMode(job.modalidade ?? job.work_model ?? job.modalidade_trabalho),
+    descricao: job.descricao ?? job.description ?? "",
+    departamento: job.departamento ?? job.area ?? "",
+  };
+}
+
+function normalizeJobsResponse(data) {
+  const list = Array.isArray(data) ? data : data?.vagas ?? data?.jobs ?? data?.data ?? [];
+  return list.map(normalizeJob);
+}
+
+function normalizeMatchResponse(data) {
+  const candidates = data?.candidatos ?? data?.candidates ?? [];
+  return {
+    candidates: candidates.map((candidate) => ({
+      id: candidate.candidato_id ?? candidate.id,
+      initials: initialsFromName(candidate.nome ?? candidate.name),
+      name: candidate.nome ?? candidate.name ?? "Candidato sem nome",
+      score: Math.round(candidate.score_match ?? candidate.score ?? 0),
+      badge: Boolean(candidate.badge_diversidade?.length ?? candidate.badge),
+      tags: candidate.badge_diversidade?.length ? candidate.badge_diversidade : ["Sem autodeclaração informada"],
+      role: candidate.titulo_profissional ?? candidate.role ?? candidate.nivel ?? "Perfil profissional",
+      education: candidate.formacao ?? candidate.education ?? candidate.localizacao?.regiao ?? "Formação não informada",
+      skills: parseSkills(candidate.skills),
+    })),
+    metrics: data?.metricas ?? data?.metrics ?? null,
+    aiInsight: data?.ai_insight ?? data?.aiInsight ?? "Insight ainda não disponível para esta shortlist.",
+  };
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message ?? `Erro HTTP ${response.status}`);
+  }
+  return data;
+}
 
 function App() {
   const [screen, setScreen] = useState("login");
   const [isAuthed, setIsAuthed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(47);
+  const [companyProfile, setCompanyProfile] = useState(defaultCompany);
+  const [jobs, setJobs] = useState([]);
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [matchResult, setMatchResult] = useState({ candidates: [], metrics: null, aiInsight: "" });
+  const [loading, setLoading] = useState("");
+  const [error, setError] = useState("");
 
   const selectedJob = useMemo(
-    () => jobs.find((job) => job.id === selectedJobId) ?? jobs[0],
-    [selectedJobId]
+    () => jobs.find((job) => String(job.id) === String(selectedJobId)) ?? jobs[0] ?? null,
+    [jobs, selectedJobId]
   );
 
   function navigate(nextScreen) {
     const target = steps.find((step) => step.id === nextScreen);
     if (!target) return;
     if (!target.public && !isAuthed) return;
+    setError("");
+    setScreen(nextScreen);
+    if (nextScreen === "jobs") {
+      loadJobs();
+    }
+  }
+
+  async function loadJobs() {
+    setLoading("jobs");
+    setError("");
+    try {
+      const data = await apiRequest("/jobs");
+      const nextJobs = normalizeJobsResponse(data);
+      setJobs(nextJobs);
+      if (!selectedJobId && nextJobs[0]) {
+        setSelectedJobId(nextJobs[0].id);
+      }
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading("");
+    }
+  }
+
+  function authenticate(data, nextScreen = "publish") {
+    const user = data?.user ?? data?.empresa ?? data?.company;
+    if (user) {
+      const name = user.companyName ?? user.company_name ?? user.razao_social ?? user.nome_empresa ?? user.name ?? user.nome ?? defaultCompany.nome;
+      setCompanyProfile({
+        id: user.id ?? user.company_id ?? user.empresa_id ?? null,
+        nome: name,
+        iniciais: initialsFromName(name),
+        metaDiversidade: user.diversity_goal ?? user.meta_diversidade ?? defaultCompany.metaDiversidade,
+      });
+    }
+    setIsAuthed(true);
     setScreen(nextScreen);
   }
 
-  function authenticate(nextScreen = "publish") {
-    setIsAuthed(true);
-    setScreen(nextScreen);
+  async function handleLogin(credentials) {
+    setLoading("auth");
+    setError("");
+    try {
+      const data = await apiRequest("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(credentials),
+      });
+      authenticate(data, "jobs");
+      await loadJobs();
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading("");
+    }
+  }
+
+  async function handleSignup(payload) {
+    setLoading("auth");
+    setError("");
+    try {
+      const data = await apiRequest("/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      authenticate(data, "publish");
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading("");
+    }
+  }
+
+  async function handleCreateJob(payload) {
+    setLoading("create-job");
+    setError("");
+    try {
+      const data = await apiRequest("/jobs", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      const createdJob = normalizeJob(data?.vaga ?? data?.job ?? data);
+      setJobs((currentJobs) => [createdJob, ...currentJobs.filter((job) => String(job.id) !== String(createdJob.id))]);
+      setSelectedJobId(createdJob.id);
+      setScreen("jobs");
+      await loadJobs();
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading("");
+    }
+  }
+
+  async function handleSelectJob(jobId) {
+    const job = jobs.find((item) => String(item.id) === String(jobId));
+    if (!job) return;
+    setSelectedJobId(jobId);
+    setScreen("results");
+    setLoading("matches");
+    setError("");
+    setMatchResult({ candidates: [], metrics: null, aiInsight: "" });
+    try {
+      const data = job.id
+        ? await apiRequest(`/jobs/${job.id}/matches`, { method: "POST" })
+        : await apiRequest("/match", {
+            method: "POST",
+            body: JSON.stringify({
+              empresa_id: companyProfile.id ?? companyProfile.nome,
+              vaga: {
+                titulo: job.titulo,
+                skills: job.skills,
+                nivel: job.nivel,
+                regiao: job.regiao,
+                modalidade: job.modalidade,
+              },
+              filtros: {
+                anti_vies: true,
+                diversidade_minima: Math.round((companyProfile.metaDiversidade ?? defaultCompany.metaDiversidade) * 100),
+              },
+            }),
+          });
+      setMatchResult(normalizeMatchResponse(data));
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading("");
+    }
   }
 
   return (
@@ -143,8 +307,10 @@ function App() {
           <LoginScreen
             showPassword={showPassword}
             setShowPassword={setShowPassword}
-            onLogin={() => authenticate("jobs")}
+            onLogin={handleLogin}
             onSignup={() => navigate("signup")}
+            loading={loading === "auth"}
+            error={error}
           />
         </AuthLayout>
       )}
@@ -154,33 +320,48 @@ function App() {
           <SignupScreen
             showPassword={showPassword}
             setShowPassword={setShowPassword}
-            onCreate={() => authenticate("publish")}
+            onCreate={handleSignup}
             onLogin={() => navigate("login")}
+            loading={loading === "auth"}
+            error={error}
           />
         </AuthLayout>
       )}
 
       {screen === "publish" && (
-        <DashboardLayout activeStep="publish" isAuthed={isAuthed} onStepClick={navigate}>
-          <PublishJobScreen onPublish={() => navigate("jobs")} />
+        <DashboardLayout activeStep="publish" isAuthed={isAuthed} onStepClick={navigate} companyProfile={companyProfile}>
+          <PublishJobScreen
+            onPublish={handleCreateJob}
+            loading={loading === "create-job"}
+            error={error}
+            companyProfile={companyProfile}
+          />
         </DashboardLayout>
       )}
 
       {screen === "jobs" && (
-        <DashboardLayout activeStep="jobs" isAuthed={isAuthed} onStepClick={navigate}>
+        <DashboardLayout activeStep="jobs" isAuthed={isAuthed} onStepClick={navigate} companyProfile={companyProfile}>
           <JobsScreen
             jobs={jobs}
-            onSelectJob={(jobId) => {
-              setSelectedJobId(jobId);
-              navigate("results");
-            }}
+            onSelectJob={handleSelectJob}
+            loading={loading === "jobs"}
+            error={error}
+            onRetry={loadJobs}
           />
         </DashboardLayout>
       )}
 
       {screen === "results" && (
-        <DashboardLayout activeStep="results" isAuthed={isAuthed} onStepClick={navigate} compact>
-          <ResultsScreen job={selectedJob} candidates={candidates} onBack={() => navigate("jobs")} />
+        <DashboardLayout activeStep="results" isAuthed={isAuthed} onStepClick={navigate} companyProfile={companyProfile} compact>
+          <ResultsScreen
+            job={selectedJob}
+            candidates={matchResult.candidates}
+            metrics={matchResult.metrics}
+            aiInsight={matchResult.aiInsight}
+            loading={loading === "matches"}
+            error={error}
+            onBack={() => navigate("jobs")}
+          />
         </DashboardLayout>
       )}
     </main>
@@ -255,7 +436,12 @@ function SignupBrandCopy() {
   );
 }
 
-function LoginScreen({ showPassword, setShowPassword, onLogin, onSignup }) {
+function LoginScreen({ showPassword, setShowPassword, onLogin, onSignup, loading, error }) {
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
   return (
     <div className="form-card login-card">
       <AppLogo variant="dark" />
@@ -268,18 +454,29 @@ function LoginScreen({ showPassword, setShowPassword, onLogin, onSignup }) {
         className="stacked-form"
         onSubmit={(event) => {
           event.preventDefault();
-          onLogin();
+          onLogin(form);
         }}
       >
-        <Field label="E-mail corporativo" placeholder="nome@empresa.com.br" type="email" />
+        <Field
+          label="E-mail corporativo"
+          placeholder="nome@empresa.com.br"
+          type="email"
+          value={form.email}
+          onChange={(value) => setForm((current) => ({ ...current, email: value }))}
+          required
+        />
         <PasswordField
           label="Senha"
           placeholder="••••••••"
           showPassword={showPassword}
           setShowPassword={setShowPassword}
+          value={form.password}
+          onChange={(value) => setForm((current) => ({ ...current, password: value }))}
+          required
         />
         <a className="forgot-link" href="#recuperar-senha">Esqueci minha senha</a>
-        <button className="primary-button" type="submit">Entrar</button>
+        {error && <p className="form-message error">{error}</p>}
+        <button className="primary-button" type="submit" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
       </form>
 
       <p className="switch-copy">
@@ -289,7 +486,20 @@ function LoginScreen({ showPassword, setShowPassword, onLogin, onSignup }) {
   );
 }
 
-function SignupScreen({ showPassword, setShowPassword, onCreate, onLogin }) {
+function SignupScreen({ showPassword, setShowPassword, onCreate, onLogin, loading, error }) {
+  const [form, setForm] = useState({
+    companyName: "",
+    sector: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptedTerms: false,
+  });
+
+  function updateField(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
   return (
     <div className="form-card signup-card">
       <AppLogo variant="dark" />
@@ -302,26 +512,43 @@ function SignupScreen({ showPassword, setShowPassword, onCreate, onLogin }) {
         className="stacked-form signup-form"
         onSubmit={(event) => {
           event.preventDefault();
-          onCreate();
+          if (form.password !== form.confirmPassword) return;
+          onCreate({
+          company_name: form.companyName,
+          name: form.companyName,
+          segment: form.sector,
+          sector: form.sector,
+          email: form.email,
+          password: form.password,
+          });
         }}
       >
-        <Field label="Nome da empresa" placeholder="Ex: Tech Solutions Ltda." />
-        <SelectLike label="Setor / segmento" placeholder="Selecione o setor" />
-        <Field label="E-mail corporativo" placeholder="rh@empresa.com.br" type="email" />
+        <Field label="Nome da empresa" placeholder="Ex: Tech Solutions Ltda." value={form.companyName} onChange={(value) => updateField("companyName", value)} required />
+        <Field label="Setor / segmento" placeholder="Ex: Tecnologia" value={form.sector} onChange={(value) => updateField("sector", value)} required />
+        <Field label="E-mail corporativo" placeholder="rh@empresa.com.br" type="email" value={form.email} onChange={(value) => updateField("email", value)} required />
         <PasswordField
           label="Senha"
           placeholder="Mínimo 8 caracteres"
           showPassword={showPassword}
           setShowPassword={setShowPassword}
+          value={form.password}
+          onChange={(value) => updateField("password", value)}
+          required
         />
-        <Field label="Confirmar senha" placeholder="••••••••" type="password" />
+        <Field label="Confirmar senha" placeholder="••••••••" type="password" value={form.confirmPassword} onChange={(value) => updateField("confirmPassword", value)} required />
 
         <label className="terms-row">
-          <input type="checkbox" />
+          <input type="checkbox" checked={form.acceptedTerms} onChange={(event) => updateField("acceptedTerms", event.target.checked)} required />
           <span>Concordo com os <a href="#termos">Termos de Uso</a> e a <a href="#privacidade">Política de Privacidade</a></span>
         </label>
 
-        <button className="primary-button" type="submit">Criar conta</button>
+        {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
+          <p className="form-message error">As senhas precisam ser iguais.</p>
+        )}
+        {error && <p className="form-message error">{error}</p>}
+        <button className="primary-button" type="submit" disabled={loading || form.password !== form.confirmPassword}>
+          {loading ? "Criando conta..." : "Criar conta"}
+        </button>
       </form>
 
       <p className="switch-copy">
@@ -331,15 +558,17 @@ function SignupScreen({ showPassword, setShowPassword, onCreate, onLogin }) {
   );
 }
 
-function DashboardLayout({ children, activeStep, isAuthed, onStepClick, compact = false }) {
+function DashboardLayout({ children, activeStep, isAuthed, onStepClick, companyProfile, compact = false }) {
+  const currentCompany = companyProfile ?? defaultCompany;
+
   return (
     <section className={`dashboard-stage ${compact ? "compact" : ""}`}>
       <AccessibilityButton />
       <header className="app-header">
         <AppLogo variant="dark" size="small" />
         <div className="company-chip">
-          <strong>{company.nome}</strong>
-          <span>{company.iniciais}</span>
+          <strong>{currentCompany.nome}</strong>
+          <span>{currentCompany.iniciais}</span>
         </div>
       </header>
       <div className="dashboard-body">{children}</div>
@@ -348,9 +577,20 @@ function DashboardLayout({ children, activeStep, isAuthed, onStepClick, compact 
   );
 }
 
-function PublishJobScreen({ onPublish }) {
+function PublishJobScreen({ onPublish, loading, error, companyProfile }) {
   const [workMode, setWorkMode] = useState("Híbrido");
   const [level, setLevel] = useState("Pleno");
+  const [form, setForm] = useState({
+    titulo: "",
+    departamento: "",
+    skills: "",
+    regiao: company.regiao,
+    descricao: "",
+  });
+
+  function updateField(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
 
   return (
     <div className="publish-page content-narrow">
@@ -360,11 +600,26 @@ function PublishJobScreen({ onPublish }) {
         className="job-form-card"
         onSubmit={(event) => {
           event.preventDefault();
-          onPublish();
+          onPublish({
+            company_id: companyProfile.id,
+            empresa_id: companyProfile.id,
+            titulo: form.titulo,
+            departamento: form.departamento,
+            area: form.departamento,
+            skills: parseSkills(form.skills),
+            nivel: normalizeLevel(level),
+            regiao: form.regiao,
+            modalidade: normalizeWorkMode(workMode),
+            diversidade_minima: Math.round((companyProfile.metaDiversidade ?? defaultCompany.metaDiversidade) * 100),
+            descricao: form.descricao,
+            status: "Ativa",
+          });
         }}
       >
-        <Field label="Título da vaga" placeholder="Ex: Analista de Dados Sênior" />
-        <Field label="Área / departamento" placeholder="Ex: Tecnologia, Marketing, RH..." />
+        <Field label="Título da vaga" placeholder="Ex: Analista de Dados Sênior" value={form.titulo} onChange={(value) => updateField("titulo", value)} required />
+        <Field label="Área / departamento" placeholder="Ex: Tecnologia, Marketing, RH..." value={form.departamento} onChange={(value) => updateField("departamento", value)} required />
+        <Field label="Skills principais" placeholder="Ex: Python, SQL, Spark" value={form.skills} onChange={(value) => updateField("skills", value)} required />
+        <Field label="Região" placeholder="Ex: CBD_BEIRAMAR" value={form.regiao} onChange={(value) => updateField("regiao", value)} required />
 
         <ChoiceGroup label="Modalidade">
           {[
@@ -397,19 +652,37 @@ function PublishJobScreen({ onPublish }) {
 
         <label className="field-block">
           <span>Descrição da vaga</span>
-          <textarea placeholder="Descreva responsabilidades, requisitos e diferenciais..." />
+          <textarea
+            placeholder="Descreva responsabilidades, requisitos e diferenciais..."
+            value={form.descricao}
+            onChange={(event) => updateField("descricao", event.target.value)}
+            required
+          />
         </label>
 
-        <button className="primary-button publish-button" type="submit">Publicar vaga</button>
+        {error && <p className="form-message error">{error}</p>}
+        <button className="primary-button publish-button" type="submit" disabled={loading}>
+          {loading ? "Publicando..." : "Publicar vaga"}
+        </button>
       </form>
     </div>
   );
 }
 
-function JobsScreen({ jobs: jobList, onSelectJob }) {
+function JobsScreen({ jobs: jobList, onSelectJob, loading, error, onRetry }) {
   return (
     <div className="jobs-page content-narrow">
       <PageTitle title="Vagas publicadas" subtitle="Clique em uma vaga para ver os perfis recomendados" />
+      {loading && <p className="state-message">Carregando vagas publicadas...</p>}
+      {error && (
+        <div className="state-message error">
+          <span>{error}</span>
+          <button type="button" onClick={onRetry}>Tentar novamente</button>
+        </div>
+      )}
+      {!loading && !error && jobList.length === 0 && (
+        <p className="state-message">Nenhuma vaga publicada ainda.</p>
+      )}
       <div className="jobs-list">
         {jobList.map((job) => (
           <button className="job-card" type="button" key={job.id} onClick={() => onSelectJob(job.id)}>
@@ -425,7 +698,23 @@ function JobsScreen({ jobs: jobList, onSelectJob }) {
   );
 }
 
-function ResultsScreen({ job, candidates: candidateList, onBack }) {
+function ResultsScreen({ job, candidates: candidateList, metrics, aiInsight, loading, error, onBack }) {
+  const totalCandidates = candidateList.length;
+  const highScoreCandidates = candidateList.filter((candidate) => candidate.score > 80).length;
+  const diversityPercentage = metrics?.diversidade_resultado?.percentual_diversidade;
+
+  if (!job) {
+    return (
+      <div className="results-page content-narrow">
+        <button className="back-button" type="button" onClick={onBack}>
+          <ArrowLeft size={18} />
+          Voltar
+        </button>
+        <p className="state-message error">Selecione uma vaga antes de gerar o matching.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="results-page content-narrow">
       <button className="back-button" type="button" onClick={onBack}>
@@ -436,13 +725,13 @@ function ResultsScreen({ job, candidates: candidateList, onBack }) {
 
       <div className="results-heading">
         <h1>Perfis recomendados</h1>
-        <span className="found-pill">4 candidatos encontrados</span>
+        <span className="found-pill">{totalCandidates} candidatos encontrados</span>
       </div>
 
       <div className="filter-row">
         <div className="segmented">
-          <button className="active" type="button">Todos (4)</button>
-          <button type="button">Score &gt; 80% (2)</button>
+          <button className="active" type="button">Todos ({totalCandidates})</button>
+          <button type="button">Score &gt; 80% ({highScoreCandidates})</button>
         </div>
         <button className="sort-button" type="button">
           <SlidersHorizontal size={18} />
@@ -457,14 +746,25 @@ function ResultsScreen({ job, candidates: candidateList, onBack }) {
           <strong>ANÁLISE DA SHORTLIST</strong>
           <span>Gerado agora</span>
         </div>
-        <p>Encontramos 4 perfis com alta compatibilidade para esta vaga.</p>
-        <p><b>Mariana Souza</b> se destaca com <b>91% de compatibilidade</b> e experiência alinhada às competências prioritárias da posição.</p>
-        <footer>Fonte: modelo de matching interno v2.3 · Critérios: técnico 60% / cultural 25% / diversidade 15%</footer>
+        {loading && <p>Gerando shortlist e métricas de diversidade...</p>}
+        {error && <p className="form-message error">{error}</p>}
+        {!loading && !error && (
+          <>
+            <p>{aiInsight}</p>
+            {typeof diversityPercentage === "number" && (
+              <p><b>Diversidade da shortlist:</b> {diversityPercentage}%</p>
+            )}
+          </>
+        )}
+        <footer>Fonte: motor de matching do backend · Critérios: skills, senioridade, região, modalidade e contexto territorial</footer>
       </article>
 
       <div className="candidate-divider"><span>LISTA DE CANDIDATOS</span></div>
 
       <div className="candidate-list">
+        {!loading && !error && candidateList.length === 0 && (
+          <p className="state-message">Nenhum candidato retornado para esta vaga.</p>
+        )}
         {candidateList.map((candidate) => (
           <CandidateCard candidate={candidate} key={candidate.id} />
         ))}
@@ -533,23 +833,37 @@ function StepNav({ activeStep, isAuthed, onStepClick, authVariant = false }) {
   );
 }
 
-function Field({ label, placeholder, type = "text" }) {
+function Field({ label, placeholder, type = "text", value, onChange, required = false }) {
   const id = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return (
     <label className="field-block" htmlFor={id}>
       <span>{label}</span>
-      <input id={id} placeholder={placeholder} type={type} />
+      <input
+        id={id}
+        placeholder={placeholder}
+        type={type}
+        value={value}
+        onChange={(event) => onChange?.(event.target.value)}
+        required={required}
+      />
     </label>
   );
 }
 
-function PasswordField({ label, placeholder, showPassword, setShowPassword }) {
+function PasswordField({ label, placeholder, showPassword, setShowPassword, value, onChange, required = false }) {
   const id = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return (
     <label className="field-block" htmlFor={id}>
       <span>{label}</span>
       <div className="password-field">
-        <input id={id} placeholder={placeholder} type={showPassword ? "text" : "password"} />
+        <input
+          id={id}
+          placeholder={placeholder}
+          type={showPassword ? "text" : "password"}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+          required={required}
+        />
         <button type="button" onClick={() => setShowPassword((current) => !current)} aria-label="Mostrar senha">
           {showPassword ? <EyeOff size={21} /> : <Eye size={21} />}
         </button>

@@ -446,6 +446,48 @@ a {
   font-weight: 950;
 }
 
+.primary-button:disabled {
+  opacity: 0.72;
+}
+
+.form-message,
+.state-message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.form-message.error,
+.state-message.error {
+  color: #b42318;
+}
+
+.state-message {
+  margin-top: 28px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+}
+
+.state-message.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff6f4;
+  border-color: #ffd7d1;
+}
+
+.state-message button {
+  background: transparent;
+  color: var(--blue-link);
+  font-weight: 950;
+  white-space: nowrap;
+}
+
 .switch-copy {
   margin: 24px 0 0;
   text-align: center;
