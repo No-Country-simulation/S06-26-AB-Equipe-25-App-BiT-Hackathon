@@ -29,7 +29,7 @@ Todo o processo de estruturação, viabilidade e arquitetura do projeto está de
 
 ## Execução Local do Backend
 
-O backend atual usa **Node.js + Express + TypeScript + TypeORM + SQLite**.
+O backend atual usa **Node.js + Express + TypeScript + TypeORM**, com suporte a **SQLite** e **PostgreSQL**.
 
 ### Instalação
 
@@ -53,6 +53,42 @@ Comandos úteis de migration:
 npm run migration:show
 npm run migration:run
 npm run migration:revert
+```
+
+### Configurar banco de dados
+
+Por padrão, o backend usa SQLite. Para trocar o banco, defina `DATABASE_DRIVER`:
+
+A configuração fica isolada em `backend/src/infraestrutura/database`; rotas e regras de negócio não precisam mudar para alternar entre SQLite e PostgreSQL.
+
+```bash
+DATABASE_DRIVER=sqlite
+DATABASE_PATH=./database.sqlite
+```
+
+Para PostgreSQL, use `DATABASE_URL`:
+
+```bash
+DATABASE_DRIVER=postgres
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/appbit
+```
+
+Ou variáveis separadas:
+
+```bash
+DATABASE_DRIVER=postgres
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=appbit
+```
+
+Se o provedor exigir SSL:
+
+```bash
+DATABASE_SSL=true
+DATABASE_SSL_REJECT_UNAUTHORIZED=false
 ```
 
 ### Rodar em desenvolvimento
