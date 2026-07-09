@@ -179,11 +179,12 @@ function App() {
     }
   }
 
-  async function loadJobs() {
+  async function loadJobs(companyId = companyProfile.id) {
     setLoading("jobs");
     setError("");
     try {
-      const data = await apiRequest("/jobs");
+      const query = companyId ? `?company_id=${encodeURIComponent(companyId)}` : "";
+      const data = await apiRequest(`/jobs${query}`);
       const nextJobs = normalizeJobsResponse(data);
       setJobs(nextJobs);
       if (!selectedJobId && nextJobs[0]) {
@@ -198,17 +199,20 @@ function App() {
 
   function authenticate(data, nextScreen = "publish") {
     const user = data?.user ?? data?.empresa ?? data?.company;
+    let nextCompanyProfile = companyProfile;
     if (user) {
       const name = user.companyName ?? user.company_name ?? user.razao_social ?? user.nome_empresa ?? user.name ?? user.nome ?? defaultCompany.nome;
-      setCompanyProfile({
+      nextCompanyProfile = {
         id: user.id ?? user.company_id ?? user.empresa_id ?? null,
         nome: name,
         iniciais: initialsFromName(name),
         metaDiversidade: user.diversity_goal ?? user.meta_diversidade ?? defaultCompany.metaDiversidade,
-      });
+      };
+      setCompanyProfile(nextCompanyProfile);
     }
     setIsAuthed(true);
     setScreen(nextScreen);
+    return nextCompanyProfile;
   }
 
   async function handleLogin(credentials) {
@@ -219,8 +223,8 @@ function App() {
         method: "POST",
         body: JSON.stringify(credentials),
       });
-      authenticate(data, "jobs");
-      await loadJobs();
+      const nextCompanyProfile = authenticate(data, "jobs");
+      await loadJobs(nextCompanyProfile.id);
     } catch (requestError) {
       setError(requestError.message);
     } finally {

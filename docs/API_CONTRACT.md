@@ -10,6 +10,79 @@ A API seguirá o padrão **RESTful usando JSON**, focando inicialmente em dois e
 
 ## Endpoints Principais (MVP)
 
+### 0. Autenticação da Empresa
+
+Cria e autentica a conta corporativa usada pelo fluxo B2B.
+
+**Endpoint:** `POST /api/v1/auth/signup`
+
+```json
+{
+  "company_name": "Empresa Demo",
+  "segment": "Tecnologia",
+  "email": "talentos@empresa.com",
+  "password": "appbit123",
+  "regiao": "Florianopolis - SC",
+  "meta_diversidade": 45
+}
+```
+
+**Endpoint:** `POST /api/v1/auth/login`
+
+```json
+{
+  "email": "talentos@empresa.com",
+  "password": "appbit123"
+}
+```
+
+Resposta esperada:
+
+```json
+{
+  "message": "Login realizado com sucesso",
+  "company": {
+    "id": "uuid-empresa-x",
+    "name": "Empresa Demo",
+    "segment": "Tecnologia",
+    "region": "Florianopolis - SC",
+    "contact_email": "talentos@empresa.com",
+    "diversity_goal": 0.45
+  }
+}
+```
+
+---
+
+### 0.1. Vagas Publicadas
+
+Cria e lista vagas persistidas por empresa.
+
+**Endpoint:** `GET /api/v1/jobs?company_id=uuid-empresa-x`
+
+**Endpoint:** `POST /api/v1/jobs`
+
+```json
+{
+  "company_id": "uuid-empresa-x",
+  "titulo": "Desenvolvedor Backend Pleno",
+  "area": "Backend",
+  "skills": ["Node.js", "TypeScript", "PostgreSQL"],
+  "nivel": "pleno",
+  "regiao": "Florianopolis - SC",
+  "modalidade": "remoto",
+  "descricao": "Desenvolvimento de APIs REST com Node.js e TypeScript.",
+  "diversidade_minima": 40,
+  "status": "aberta"
+}
+```
+
+**Endpoint:** `POST /api/v1/jobs/{job_id}/matches`
+
+Gera uma shortlist a partir da vaga persistida, substitui os matches anteriores dessa vaga e retorna o mesmo formato principal de `POST /api/v1/match`, acrescido de `job_id` e `matches`.
+
+---
+
 ### 1. Criar Matching e Gerar Shortlist
 
 Gera a lista de candidatos com base na vaga informada e retorna também as métricas e o insight gerado pela IA.

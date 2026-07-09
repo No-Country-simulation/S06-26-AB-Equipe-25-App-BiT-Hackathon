@@ -255,6 +255,12 @@ export async function runPersistentMatching(jobId: string) {
     };
   }
 
+  await match.repository
+    .createQueryBuilder()
+    .delete()
+    .where("job_id = :jobId", { jobId })
+    .execute();
+
   const savedMatches = await match.repository.save(
     result.shortlist.map(({ candidate, score_match }) => {
       const entity = match.repository.create();

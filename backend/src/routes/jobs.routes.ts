@@ -68,6 +68,20 @@ function getColumnProperty(metadata: EntityMetadata, candidates: string[]): stri
   return column?.propertyName ?? null;
 }
 
+function getRelationProperty(metadata: EntityMetadata, candidates: string[]): string | null {
+  const relation = metadata.relations.find((item) =>
+    candidates.some(
+      (candidate) =>
+        item.propertyName.toLowerCase() === candidate.toLowerCase() ||
+        item.joinColumns.some(
+          (joinColumn) => joinColumn.databaseName.toLowerCase() === candidate.toLowerCase(),
+        ),
+    ),
+  );
+
+  return relation?.propertyName ?? null;
+}
+
 function assignIfColumn(
   entity: ObjectLiteral,
   metadata: EntityMetadata,
@@ -188,35 +202,46 @@ jobsRoutes.post("/", async (req, res) => {
 });
 
 jobsRoutes.get("/", async (req, res) => {
-  const job = getEntityRepository(jobEntityNames);
+  try {
+    const job = getEntityRepository(jobEntityNames);
 
-  if (!job) {
-    return res.status(501).json({
-      message: "Entidade Job/Vaga nao registrada no backend",
+    if (!job) {
+      return res.status(501).json({
+        message: "Entidade Job/Vaga nao registrada no backend",
+      });
+    }
+
+    const companyId = req.query.company_id ?? req.query.empresa_id;
+    const companyRelation = getRelationProperty(job.metadata, ["company", "company_id", "empresa_id"]);
+    const companyProperty = getColumnProperty(job.metadata, ["company_id", "empresa_id"]);
+    const options: FindManyOptions<ObjectLiteral> = {};
+
+    if (typeof companyId === "string" && companyRelation) {
+      options.where = { [companyRelation]: { id: companyId } };
+    } else if (typeof companyId === "string" && companyProperty) {
+      options.where = { [companyProperty]: companyId };
+    }
+
+    const orderProperty = getColumnProperty(job.metadata, [
+      "created_at",
+      "data_publicacao",
+      "published_at",
+    ]);
+
+    if (orderProperty) {
+      options.order = { [orderProperty]: "DESC" };
+    }
+
+    const jobs = await job.repository.find(options);
+
+    return res.json({ jobs });
+  } catch (error: unknown) {
+    console.error("Erro ao listar vagas:", error);
+
+    return res.status(500).json({
+      message: "Erro interno ao listar vagas",
     });
   }
-
-  const companyId = req.query.company_id ?? req.query.empresa_id;
-  const companyProperty = getColumnProperty(job.metadata, ["company_id", "empresa_id"]);
-  const options: FindManyOptions<ObjectLiteral> = {};
-
-  if (typeof companyId === "string" && companyProperty) {
-    options.where = { [companyProperty]: companyId };
-  }
-
-  const orderProperty = getColumnProperty(job.metadata, [
-    "created_at",
-    "data_publicacao",
-    "published_at",
-  ]);
-
-  if (orderProperty) {
-    options.order = { [orderProperty]: "DESC" };
-  }
-
-  const jobs = await job.repository.find(options);
-
-  return res.json({ jobs });
 });
 
 jobsRoutes.post("/:id/matches", async (req, res) => {
