@@ -38,13 +38,22 @@ cd backend
 npm install
 ```
 
-### Popular banco local
+### Criar e popular banco local
 
 ```bash
+npm run migration:run
 npm run seed
 ```
 
-O comando cria/atualiza o SQLite local e insere candidatos sintéticos para a demo. O arquivo `database.sqlite` é local e não deve ser commitado.
+As migrations criam as tabelas do SQLite local. O seed insere empresa, vagas, candidatos sintéticos, matches e dados regionais para a demo. O arquivo `database.sqlite` é local e não deve ser commitado.
+
+Comandos úteis de migration:
+
+```bash
+npm run migration:show
+npm run migration:run
+npm run migration:revert
+```
 
 ### Rodar em desenvolvimento
 
@@ -52,13 +61,13 @@ O comando cria/atualiza o SQLite local e insere candidatos sintéticos para a de
 npm run dev
 ```
 
-Servidor padrão: `http://localhost:3001`
+Servidor padrão: `http://localhost:3003`
 
 ### Credencial de login mockada
 
 ```json
 {
-  "email": "recrutador@appbit.local",
+  "email": "talentos@bittech.example",
   "password": "appbit123"
 }
 ```
@@ -66,21 +75,21 @@ Servidor padrão: `http://localhost:3001`
 ### Health check
 
 ```bash
-curl http://localhost:3001/api/v1/health
+curl http://localhost:3003/api/v1/health
 ```
 
 ### Login
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/auth/login \
+curl -X POST http://localhost:3003/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"recrutador@appbit.local","password":"appbit123"}'
+  -d '{"email":"talentos@bittech.example","password":"appbit123"}'
 ```
 
 ### Matching
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/match \
+curl -X POST http://localhost:3003/api/v1/match \
   -H "Content-Type: application/json" \
   -d '{
     "empresa_id": "empresa-demo",
@@ -101,7 +110,7 @@ curl -X POST http://localhost:3001/api/v1/match \
 ### Insights regionais
 
 ```bash
-curl http://localhost:3001/api/v1/insights
+curl http://localhost:3003/api/v1/insights
 ```
 
 As rotas versionadas oficiais usam o prefixo `/api/v1`. As rotas antigas sem prefixo continuam disponíveis como aliases de desenvolvimento.

@@ -6,6 +6,7 @@ import { AppDataSource } from "./data-source.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
 import { insightsRoutes } from "./routes/insights.routes.js";
+import { jobsRoutes } from "./routes/jobs.routes.js";
 import { matchRoutes } from "./routes/match.routes.js";
 
 dotenv.config();
@@ -18,13 +19,15 @@ app.use(express.json());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/insights", insightsRoutes);
+app.use("/api/v1/jobs", jobsRoutes);
 app.use("/api/v1/match", matchRoutes);
 app.use("/auth", authRoutes);
 app.use("/health", healthRoutes);
 app.use("/insights", insightsRoutes);
+app.use("/jobs", jobsRoutes);
 app.use("/match", matchRoutes);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3003;
 
 AppDataSource.initialize()
   .then(() => {

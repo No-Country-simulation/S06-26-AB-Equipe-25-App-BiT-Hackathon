@@ -1,6 +1,11 @@
 import "reflect-metadata"
 import { AppDataSource } from "./data-source.js"
 import { Candidate } from "./entities/Candidate.js"
+import { Company } from "./entities/Company.js"
+import { Job } from "./entities/Job.js"
+import { Match } from "./entities/Match.js"
+import { TalentMap } from "./entities/TalentMap.js"
+import { scoreCandidate } from "./services/matching-engine.js"
 
 const mockCandidates = [
     {
@@ -325,20 +330,151 @@ const mockCandidates = [
     }
 ]
 
+const mockCompany = {
+    name: "BiT Tech Solutions",
+    segment: "Tecnologia e Inclusao Produtiva",
+    region: "Florianopolis - SC",
+    contact_email: "talentos@bittech.example",
+    password: "appbit123",
+    diversity_goal: 0.45
+}
+
+const mockJobs = [
+    {
+        title: "Desenvolvedor Backend Pleno",
+        area: "Backend",
+        skills: ["Node.js", "TypeScript", "PostgreSQL", "APIs REST", "Docker"],
+        level: "pleno",
+        work_model: "remoto",
+        region: "Florianopolis - SC",
+        status: "open",
+        description: "Vaga demo para validar o matching de perfis backend no MVP."
+    },
+    {
+        title: "Analista de Dados Junior",
+        area: "Dados",
+        skills: ["Python", "SQL", "Power BI", "ETL"],
+        level: "junior",
+        work_model: "hibrido",
+        region: "Sao Jose - SC",
+        status: "open",
+        description: "Vaga demo para mapear talentos de dados com disponibilidade regional."
+    },
+    {
+        title: "QA Pleno",
+        area: "QA",
+        skills: ["Testes automatizados", "Playwright", "APIs REST", "SQL"],
+        level: "pleno",
+        work_model: "hibrido",
+        region: "Sao Jose - SC",
+        status: "open",
+        description: "Vaga demo para validar aderencia de QA e automacao."
+    }
+]
+
+const mockTalentMaps = [
+    {
+        region: "Florianopolis - SC",
+        cluster_id: 101,
+        candidate_concentration: 42,
+        predominant_technology: "4G/5G",
+        mobility_indicator: "alta",
+        available_profiles: ["Desenvolvedor Backend", "Analista de Dados"],
+        lat: -27.5949,
+        lng: -48.5482
+    },
+    {
+        region: "Sao Jose - SC",
+        cluster_id: 102,
+        candidate_concentration: 31,
+        predominant_technology: "4G",
+        mobility_indicator: "media",
+        available_profiles: ["Desenvolvedor Frontend", "QA"],
+        lat: -27.6136,
+        lng: -48.6366
+    },
+    {
+        region: "Palhoca - SC",
+        cluster_id: 103,
+        candidate_concentration: 24,
+        predominant_technology: "3G/4G",
+        mobility_indicator: "media",
+        available_profiles: ["Desenvolvedor Backend", "UX/UI Designer"],
+        lat: -27.6455,
+        lng: -48.6697
+    }
+]
+
+function getMatchedSkills(jobSkills: string[], candidateSkills: string[]) {
+    const normalizedCandidateSkills = new Set(candidateSkills.map((skill) => skill.toLowerCase()))
+
+    return jobSkills.filter((skill) => normalizedCandidateSkills.has(skill.toLowerCase()))
+}
+
 async function runSeed() {
     await AppDataSource.initialize()
     console.log("Banco de dados SQLite conectado. Iniciando processo de seed...");
 
     const candidateRepo = AppDataSource.getRepository(Candidate)
+    const companyRepo = AppDataSource.getRepository(Company)
+    const jobRepo = AppDataSource.getRepository(Job)
+    const matchRepo = AppDataSource.getRepository(Match)
+    const talentMapRepo = AppDataSource.getRepository(TalentMap)
 
+    await matchRepo.clear()
+    await talentMapRepo.clear()
+    await jobRepo.clear()
+    await companyRepo.clear()
     await candidateRepo.clear()
 
+    const candidates: Candidate[] = []
     for (const data of mockCandidates) {
         const candidate = candidateRepo.create(data)
-        await candidateRepo.save(candidate)
+        candidates.push(await candidateRepo.save(candidate))
     }
 
-    console.log(`Seed concluido com sucesso! ${mockCandidates.length} candidatos mockados e inseridos.`);
+    const company = await companyRepo.save(companyRepo.create(mockCompany))
+    const jobs: Job[] = []
+
+    for (const data of mockJobs) {
+        const job = jobRepo.create({
+            ...data,
+            company
+        })
+        jobs.push(await jobRepo.save(job))
+    }
+
+    for (const job of jobs) {
+        const scoredCandidates = candidates
+            .map((candidate) => ({
+                candidate,
+                score_match: scoreCandidate(candidate, {
+                    titulo: job.title,
+                    skills: job.skills,
+                    nivel: job.level,
+                    regiao: job.region,
+                    modalidade: job.work_model
+                })
+            }))
+            .sort((a, b) => b.score_match - a.score_match)
+            .slice(0, 5)
+
+        for (const { candidate, score_match } of scoredCandidates) {
+            await matchRepo.save(matchRepo.create({
+                job,
+                candidate,
+                score_match,
+                matched_skills: getMatchedSkills(job.skills, candidate.skills),
+                insight: `Match demo para ${candidate.name} na vaga ${job.title}.`
+            }))
+        }
+    }
+
+    for (const data of mockTalentMaps) {
+        await talentMapRepo.save(talentMapRepo.create(data))
+    }
+
+    console.log(`Seed concluido com sucesso! ${mockCandidates.length} candidatos, ${mockJobs.length} vagas, ${jobs.length * 5} matches e ${mockTalentMaps.length} mapas de talentos inseridos.`);
     process.exit(0)
 }
 

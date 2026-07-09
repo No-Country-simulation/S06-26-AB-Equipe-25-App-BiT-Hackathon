@@ -7,7 +7,12 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "migration:run": "tsx ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
+    "migration:revert": "tsx ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
+    "migration:show": "tsx ./node_modules/typeorm/cli.js migration:show -d src/data-source.ts",
+    "migration:generate": "tsx ./node_modules/typeorm/cli.js migration:generate src/migrations/AutoMigration -d src/data-source.ts",
+    "migration:create": "tsx ./node_modules/typeorm/cli.js migration:create src/migrations/ManualMigration"
   },
   "dependencies": {
     "cors": "^2.8.6",
