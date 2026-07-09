@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 
 import { AppDataSource } from "./data-source.js";
 import { authRoutes } from "./routes/auth.routes.js";
@@ -8,8 +7,6 @@ import { healthRoutes } from "./routes/health.routes.js";
 import { insightsRoutes } from "./routes/insights.routes.js";
 import { jobsRoutes } from "./routes/jobs.routes.js";
 import { matchRoutes } from "./routes/match.routes.js";
-
-dotenv.config();
 
 const app = express();
 

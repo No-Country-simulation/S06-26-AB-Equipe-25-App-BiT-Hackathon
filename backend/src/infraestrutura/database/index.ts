@@ -1,5 +1,6 @@
 import type { DataSourceOptions } from "typeorm";
 
+import "../env.js";
 import type { DatabaseConfigContext, DatabaseDriver, DatabaseProvider } from "./contracts.js";
 import { postgresDatabaseProvider } from "./postgres.config.js";
 import { sqliteDatabaseProvider } from "./sqlite.config.js";
