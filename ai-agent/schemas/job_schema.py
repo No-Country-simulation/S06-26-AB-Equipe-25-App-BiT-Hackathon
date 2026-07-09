@@ -1,13 +1,15 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 class RegistryValidationResult(BaseModel):
     skills: List[str] = Field(
         description="Lista de habilidades/tecnologias exigidas na vaga"
     )
-    level: Literal["intern", "junior", "mid", "senior", "estagio", "pleno"] = Field(
+    level: Optional[Literal["intern", "junior", "mid", "senior", "estagio", "pleno"]] = Field(
+        default=None,
         description="Nível da vaga"
     )
-    work_model: Literal["remote", "hybrid", "on-site", "remoto", "hibrido", "presencial"] = Field(
+    work_model: Optional[Literal["remote", "hybrid", "on-site", "remoto", "hibrido", "presencial"]] = Field(
+        default=None,
         description="Modelo de trabalho"
     )
